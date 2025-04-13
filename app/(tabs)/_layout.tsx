@@ -1,4 +1,5 @@
 import { Tabs } from 'expo-router';
+import { useState, useEffect, useRef } from "react";
 import React from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 
@@ -18,17 +19,35 @@ export default function TabLayout() {
   // Log the token in the console
   console.log("Expo Push Token:", expoPushToken);
 
+  useEffect(() => {
+    if (expoPushToken) {
+      console.log("📡 Sending token to backend:", expoPushToken);
+  
+      fetch("https://b0ab-128-235-85-14.ngrok-free.app/register-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          token: expoPushToken,
+          user: "neighbor1",
+        }),
+      })
+        .then((res) => {
+          console.log("🌐 Got response from server:", res.status);
+          return res.json();
+        })
+        .then((data) => {
+          console.log("✅ Token registered:", data);
+        })
+        .catch((err) => {
+          console.error("❌ Failed to register token:", err.message || err);
+        });
+    }
+  }, [expoPushToken]);
+
   return (
     <>
-      {/* Optional UI to display token on screen */}
-      <View style={styles.tokenContainer}>
-        <Text style={styles.tokenText}>
-          Expo Push Token:
-        </Text>
-        <Text selectable style={styles.tokenValue}>
-          {expoPushToken?.toString() ?? 'Fetching...'}
-        </Text>
-      </View>
 
       <Tabs
         screenOptions={{
